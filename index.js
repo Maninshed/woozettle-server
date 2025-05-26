@@ -1,41 +1,32 @@
-// index.js
-const express = require('express');
-const WooCommerceRestApi = require('@woocommerce/woocommerce-rest-api').default;
+// index.js — Vercel-compatible Woo-Zettle sync server using internal WooCommerce API proxy
+
 require('dotenv').config();
+const axios = require('axios');
+const express = require('express');
 
 const app = express();
-const port = process.env.PORT || 3000;
+const PORT = process.env.PORT || 3000;
 
-// ✅ This is the critical fix:
-const WooCommerce = new WooCommerceRestApi({
-  url: process.env.WC_STORE_URL,
-  consumerKey: process.env.WC_CONSUMER_KEY,
-  consumerSecret: process.env.WC_CONSUMER_SECRET,
-  version: 'wc/v3',
-  queryStringAuth: true // 👈 This pushes auth into the query params instead of headers
-});
-
-// 🔁 Product fetch route
 app.get('/products', async (req, res) => {
   try {
-    const response = await WooCommerce.get('products');
+    const response = await axios.get('https://southvilletrading.store/wp-json/custom-api/v1/products');
+
+    if (!Array.isArray(response.data)) {
+      return res.status(500).json({ error: 'Unexpected response from Woo proxy' });
+    }
+
     res.json(response.data);
-  } catch (error) {
-    console.error('WooCommerce API error:', error.response.data);
-    res.status(error.response.status || 500).json(error.response.data);
+  } catch (err) {
+    console.error('Fetch error:', err.message);
+    res.status(500).json({ error: 'Failed to fetch products', message: err.message });
   }
 });
 
-// Optional debug route
-app.get('/debug-env', (req, res) => {
-  res.json({
-    WC_STORE_URL: process.env.WC_STORE_URL,
-    WC_CONSUMER_KEY: process.env.WC_CONSUMER_KEY,
-    WC_CONSUMER_SECRET: process.env.WC_CONSUMER_SECRET ? '✔️ Present' : '❌ Missing'
-  });
+// Default route
+app.get('/', (req, res) => {
+  res.send('WooZettle server is up and running via internal Woo proxy 🚀');
 });
 
-app.listen(port, () => {
-  console.log(`WooZettle server running at http://localhost:${port}`);
+app.listen(PORT, () => {
+  console.log(`Server running on http://localhost:${PORT}`);
 });
-
