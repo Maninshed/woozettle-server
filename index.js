@@ -1,52 +1,41 @@
-require('dotenv').config();
+// index.js
 const express = require('express');
 const WooCommerceRestApi = require('@woocommerce/woocommerce-rest-api').default;
+require('dotenv').config();
 
 const app = express();
+const port = process.env.PORT || 3000;
 
-// 🔧 Initialize WooCommerce API SDK
-const api = new WooCommerceRestApi({
+// ✅ This is the critical fix:
+const WooCommerce = new WooCommerceRestApi({
   url: process.env.WC_STORE_URL,
   consumerKey: process.env.WC_CONSUMER_KEY,
   consumerSecret: process.env.WC_CONSUMER_SECRET,
-  version: 'wc/v3'
+  version: 'wc/v3',
+  queryStringAuth: true // 👈 This pushes auth into the query params instead of headers
 });
 
-// 🔁 Fetch products using the SDK
-const fetchWooProducts = async () => {
-  const response = await api.get('products', {
-    per_page: 10,
-    page: 1
-  });
-  return response.data;
-};
-
-// 🔗 Route: GET /products
+// 🔁 Product fetch route
 app.get('/products', async (req, res) => {
   try {
-    const products = await fetchWooProducts();
-    res.status(200).json(products);
+    const response = await WooCommerce.get('products');
+    res.json(response.data);
   } catch (error) {
-    console.error('❌ WooCommerce API error:', error.response?.data || error.message);
-    res.status(500).json({
-      error: error.response?.data || error.message
-    });
+    console.error('WooCommerce API error:', error.response.data);
+    res.status(error.response.status || 500).json(error.response.data);
   }
 });
 
-// 🔗 Route: GET /
-app.get('/', (req, res) => {
-  res.send('✅ WooZettle server is running via WooCommerce SDK');
-});
-
-// ✅ For Vercel deployment — don't use app.listen, export the app
-module.exports = app;
-// Cache bust to force redeploy
+// Optional debug route
 app.get('/debug-env', (req, res) => {
   res.json({
     WC_STORE_URL: process.env.WC_STORE_URL,
     WC_CONSUMER_KEY: process.env.WC_CONSUMER_KEY,
     WC_CONSUMER_SECRET: process.env.WC_CONSUMER_SECRET ? '✔️ Present' : '❌ Missing'
   });
+});
+
+app.listen(port, () => {
+  console.log(`WooZettle server running at http://localhost:${port}`);
 });
 
