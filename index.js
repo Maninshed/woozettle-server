@@ -1,32 +1,18 @@
-// index.js — Vercel-compatible Woo-Zettle sync server using internal WooCommerce API proxy
+const fetch = require('node-fetch'); // Required for Node
 
-require('dotenv').config();
-const axios = require('axios');
-const express = require('express');
-
-const app = express();
-const PORT = process.env.PORT || 3000;
-
-app.get('/products', async (req, res) => {
+module.exports = async (req, res) => {
   try {
-    const response = await axios.get('https://southvilletrading.store/wp-json/custom-api/v1/products');
+    const response = await fetch('https://southvilletrading.store/wp-json/custom-api/v1/products');
+    const products = await response.json();
 
-    if (!Array.isArray(response.data)) {
-      return res.status(500).json({ error: 'Unexpected response from Woo proxy' });
+    if (!Array.isArray(products)) {
+      throw new Error('Invalid products response');
     }
 
-    res.json(response.data);
-  } catch (err) {
-    console.error('Fetch error:', err.message);
-    res.status(500).json({ error: 'Failed to fetch products', message: err.message });
+    res.status(200).json({ success: true, products });
+  } catch (error) {
+    console.error('Fetch failed:', error);
+    res.status(500).json({ success: false, error: error.message });
   }
-});
+};
 
-// Default route
-app.get('/', (req, res) => {
-  res.send('WooZettle server is up and running via internal Woo proxy 🚀');
-});
-
-app.listen(PORT, () => {
-  console.log(`Server running on http://localhost:${PORT}`);
-});
