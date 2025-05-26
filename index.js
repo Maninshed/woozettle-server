@@ -1,9 +1,12 @@
 require('dotenv').config();
+const express = require('express');
 const axios = require('axios');
 
-const { WC_STORE_URL, WC_CONSUMER_KEY, WC_CONSUMER_SECRET } = process.env;
+const app = express();
+const port = process.env.PORT || 3000;
 
-const fetchWooProducts = async () => {
+app.get('/products', async (req, res) => {
+  const { WC_STORE_URL, WC_CONSUMER_KEY, WC_CONSUMER_SECRET } = process.env;
   const url = `${WC_STORE_URL}/wp-json/wc/v3/products`;
 
   try {
@@ -18,12 +21,22 @@ const fetchWooProducts = async () => {
       }
     });
 
-    console.log(`✅ Fetched ${response.data.length} products`);
-    console.dir(response.data, { depth: null });
+    res.json(response.data);
 
   } catch (error) {
-    console.error('❌ WooCommerce API error:', error?.response?.data || error.message);
+    res.status(500).json({
+      error: error?.response?.data || error.message
+    });
   }
-};
+});
+
+app.get('/', (req, res) => {
+  res.send('✅ WooZettle server is running.');
+});
+
+app.listen(port, () => {
+  console.log(`🚀 Server running on port ${port}`);
+});
+
 
 fetchWooProducts();
