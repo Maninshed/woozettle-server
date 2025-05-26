@@ -1,41 +1,44 @@
 require('dotenv').config();
 const express = require('express');
-const axios = require('axios');
+const WooCommerceRestApi = require('@woocommerce/woocommerce-rest-api').default;
 
 const app = express();
 
+// 🔧 Initialize WooCommerce API SDK
+const api = new WooCommerceRestApi({
+  url: process.env.WC_STORE_URL,
+  consumerKey: process.env.WC_CONSUMER_KEY,
+  consumerSecret: process.env.WC_CONSUMER_SECRET,
+  version: 'wc/v3'
+});
+
+// 🔁 Fetch products using the SDK
 const fetchWooProducts = async () => {
-  const { WC_STORE_URL, WC_CONSUMER_KEY, WC_CONSUMER_SECRET } = process.env;
-  const url = `${WC_STORE_URL}/wp-json/wc/v3/products`;
-
-  const response = await axios.get(url, {
-    auth: {
-      username: WC_CONSUMER_KEY,
-      password: WC_CONSUMER_SECRET
-    },
-    params: {
-      per_page: 10,
-      page: 1
-    }
+  const response = await api.get('products', {
+    per_page: 10,
+    page: 1
   });
-
   return response.data;
 };
 
+// 🔗 Route: GET /products
 app.get('/products', async (req, res) => {
   try {
     const products = await fetchWooProducts();
-    res.json(products);
+    res.status(200).json(products);
   } catch (error) {
-    console.error('❌ WooCommerce API error:', error?.response?.data || error.message);
-    res.status(500).json({ error: error?.response?.data || error.message });
+    console.error('❌ WooCommerce API error:', error.response?.data || error.message);
+    res.status(500).json({
+      error: error.response?.data || error.message
+    });
   }
 });
 
+// 🔗 Route: GET /
 app.get('/', (req, res) => {
-  res.send('✅ WooZettle server is running.');
+  res.send('✅ WooZettle server is running via WooCommerce SDK');
 });
 
-// Vercel: must export the app (not call app.listen)
+// ✅ For Vercel deployment — don't use app.listen, export the app
 module.exports = app;
 
