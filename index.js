@@ -42,4 +42,11 @@ app.get('/', (req, res) => {
 // ✅ For Vercel deployment — don't use app.listen, export the app
 module.exports = app;
 // Cache bust to force redeploy
+app.get('/debug-env', (req, res) => {
+  res.json({
+    WC_STORE_URL: process.env.WC_STORE_URL,
+    WC_CONSUMER_KEY: process.env.WC_CONSUMER_KEY,
+    WC_CONSUMER_SECRET: process.env.WC_CONSUMER_SECRET ? '✔️ Present' : '❌ Missing'
+  });
+});
 
