@@ -1,0 +1,9 @@
+<resources>
+    <string name="app_name">Zettle Payments SDK Example</string>
+    <string name="client_id">04bb71f8-fdd4-4200-b476-d5bbd34827b7</string>
+    <string name="redirect_url_scheme">zettleexample</string>
+    <string name="redirect_url_host">auth</string>
+    <string name="oauth_activity_task_affinity">zettle.example</string>
+
+
+</resources>

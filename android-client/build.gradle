@@ -1,0 +1,24 @@
+dependencyResolutionManagement {
+    repositories {
+        google()
+        mavenCentral()
+
+        maven {
+            url = uri("https://maven.pkg.github.com/zettle/zettle-android")
+            credentials {
+                username = project.findProperty("gpr.user") ?: System.getenv("USERNAME")
+                password = project.findProperty("gpr.key") ?: System.getenv("TOKEN")
+            }
+        }
+    }
+}
+
+
+// Optional clean task
+tasks.register("clean", Delete) {
+    delete rootProject.buildDir
+}
+
+
+
+

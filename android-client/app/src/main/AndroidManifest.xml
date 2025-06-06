@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
+
+    <application
+        android:name=".MainApplication"
+        android:allowBackup="true"
+        android:fullBackupContent="false"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+        android:roundIcon="@mipmap/ic_launcher_round"
+        android:supportsRtl="true"
+        android:theme="@style/AppTheme"
+        tools:replace="android:fullBackupContent,android:supportsRtl">
+
+        <!-- Launcher -->
+        <activity
+            android:name=".StartActivity"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+        <!-- Corrected UI Activities -->
+        <activity android:name="com.zettle.payments.android.kotlin_example.ui.ProductGridActivity" />
+        <activity android:name="com.zettle.payments.android.kotlin_example.ui.CategoryGridActivity"/>
+
+        <!-- Other Activities -->
+        <activity android:name=".MainActivity" />
+        <activity android:name=".CardReaderActivity" android:label="Card Reader" />
+
+        <activity android:name=".ManualCardEntryActivity" android:label="Manual Card Entry" />
+        <activity android:name=".SelectTippingStyleActivity" android:label="Select Tipping Style" />
+
+        <!-- OAuth Redirect Handler -->
+        <activity
+            android:name="com.izettle.android.auth.OAuthActivity"
+            android:exported="true"
+            android:launchMode="singleTask">
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data
+                    android:scheme="zettleexample"
+                    android:host="auth"
+                    android:path="/callback" />
+            </intent-filter>
+        </activity>
+
+    </application>
+
+</manifest>
